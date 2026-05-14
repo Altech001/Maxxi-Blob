@@ -1,0 +1,29 @@
+.vercel
+node_modules/
+dist/
+
+# Local env/secrets
+.env
+.env.*
+!.env.example
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+.ruff_cache/
+.pytest_cache/
+.venv/
+*.db
+*.sqlite
+*.sqlite3
+
+# Telegram/local auth session files
+*.session
+*.session-journal
+
+# Nested app local state
+maxxi/.env
+maxxi/.env.*
+!maxxi/.env.example
+maxxi/.vercel/
+maxxi/.ruff_cache/
