@@ -8,12 +8,14 @@ import { useMemo, useState } from 'react';
 import { toast } from "sonner";
 
 import { maxxiApi } from '@/lib/maxxiApi';
+import { MAXXI_PUBLIC_API_URL } from '@/lib/config';
 import type { Bucket, CdnFile } from '@/types/cdn';
 import GoogleAuthPanel from '@/components/auth/GoogleAuthPanel';
 import CreateBucketDialog from '../components/bucket/CreateBucketDialog';
 import BucketsTable from '../components/dashboard/BucketsTable';
 import MetricCard from '../components/dashboard/MetricCard';
 import InfoBanner from "@/components/dashboard/InfoBanner";
+import Docs from "@/components/docs/Docs";
 
 function formatTotalSize(bytes: number): string {
   if (!bytes || bytes === 0) return '0 B';
@@ -74,7 +76,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold">Maxxi CDN</h1>
+            <h1 className="text-xl font-semibold">Maxxi</h1>
             <p className="text-sm text-muted-foreground">Buckets, policies, and upload operations.</p>
           </div>
           <GoogleAuthPanel />
@@ -93,8 +95,7 @@ export default function Dashboard() {
           <MetricCard icon={Package} label="Total Objects" value={filesLoading ? '…' : totalObjects} color="amber" />
         </div>
 
-        {/* Files Section */}
-        <h2 className="text-lg font-semibold mb-4">Files</h2>
+        <h2 className="text-lg font-semibold mb-4">{tab === 'docs' ? 'Developer Docs' : 'Files'}</h2>
 
         {/* Endpoint bar */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
@@ -104,9 +105,9 @@ export default function Dashboard() {
               Base URL
             </div>
             <div className="flex items-center gap-2 bg-card border border-border rounded-r-md px-3 py-1.5">
-              <span className="text-sm text-muted-foreground">https://mxcdn.vercel.app</span>
+              <span className="text-sm text-muted-foreground">{MAXXI_PUBLIC_API_URL}</span>
               <button
-                onClick={() => { navigator.clipboard.writeText('https://mxcdn.vercel.app'); toast.success('Copied!'); }}
+                onClick={() => { navigator.clipboard.writeText(MAXXI_PUBLIC_API_URL); toast.success('Copied!'); }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -119,34 +120,39 @@ export default function Dashboard() {
         <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="h-9">
-              <TabsTrigger value="all" className="text-sm px-4">all</TabsTrigger>
+              <TabsTrigger value="all" className="text-sm px-4">All files</TabsTrigger>
+              <TabsTrigger value="docs" className="text-sm px-4">Docs</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search folder by prefix..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-64 h-9"
-              />
+          {tab === 'all' && (
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search folder by prefix..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 w-64 h-9"
+                />
+              </div>
+              <Button onClick={() => setShowCreate(true)} className="h-9">
+                <Plus className="h-4 w-4 mr-1.5" /> Upload File
+              </Button>
             </div>
-            <Button onClick={() => setShowCreate(true)} className="h-9">
-              <Plus className="h-4 w-4 mr-1.5" /> Upload File
-            </Button>
-          </div>
+          )}
         </div>
 
-        <InfoBanner
-          message="Files are stored via Maxxi CDN — bytes in Telegram, metadata in GitHub."
-          linkText="View API docs →"
-          onLinkClick={() => window.open('https://mxcdn.vercel.app/docs', '_blank')}
-        />
+        {tab === 'all' && (
+          <InfoBanner
+            message="Files are stored via Maxxi CDN — bytes in Telegram or GitHub, metadata in GitHub."
+            linkText="View API docs →"
+            onLinkClick={() => setTab('docs')}
+          />
+        )}
 
         <div className="mt-4">
-          <BucketsTable buckets={filteredBuckets} onDelete={() => {}} />
+          {tab === 'docs' ? <Docs /> : <BucketsTable buckets={filteredBuckets} onDelete={() => {}} />}
         </div>
       </main>
 

@@ -29,6 +29,7 @@ import FileTable from '../components/bucket/FileTable';
 import UploadDialog from '../components/bucket/UploadDialog';
 import FilePreviewModal from '@/components/bucket/FilePreviewModal';
 import { maxxiApi } from '@/lib/maxxiApi';
+import { publicApiUrl } from '@/lib/config';
 import type { CdnFile } from '@/types/cdn';
 
 type PendingDelete =
@@ -95,7 +96,7 @@ export default function BucketDetail() {
       resource: folder ? `/api/v1/files?folder=${folder}` : '/api/v1/files',
       conditions: {
         maxUploadSize: 'backend-default',
-        cdnBaseUrl: maxxiApi.BASE_URL,
+        cdnBaseUrl: maxxiApi.PUBLIC_BASE_URL,
       },
     }, null, 2);
   }, [folder, policyAllowList, policyAllowUploads, policyPublicRead]);
@@ -208,7 +209,7 @@ export default function BucketDetail() {
                 <span className="text-emerald-600 font-medium">Public · Global</span>
               </div>
               <p className="text-xs text-muted-foreground mt-2 font-mono">
-                https://mxcdn.vercel.app/api/v1/files?folder={folder}
+                {publicApiUrl(`/api/v1/files?folder=${encodeURIComponent(folder)}`)}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-4">
@@ -216,7 +217,7 @@ export default function BucketDetail() {
                 <ShieldCheck className="h-3.5 w-3.5" />
                 {detectedFolderId ? `Folder ID ${detectedFolderId}` : 'Auto target root'}
                 </Badge> */}
-              <Button variant="outline" className='bg-transparent' size="sm" onClick={() => window.open(`https://mxcdn.vercel.app/api/v1/files?folder=${encodeURIComponent(folder)}`, '_blank')}>
+              <Button variant="outline" className='bg-transparent' size="sm" onClick={() => window.open(publicApiUrl(`/api/v1/files?folder=${encodeURIComponent(folder)}`), '_blank')}>
                 View JSON
               </Button>
                 <Link to="/policies/bucket" state={{ bucket: folder, policy: bucketPolicy }}>

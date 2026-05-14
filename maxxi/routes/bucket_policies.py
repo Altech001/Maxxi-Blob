@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from auth.jwt import get_current_user
+from db_models import User
 from utils import github_store
 
 
 router = APIRouter(prefix="/api/v1/bucket-policies", tags=["bucket-policies"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/google")
 
 
 class BucketPolicy(BaseModel):
@@ -59,28 +59,6 @@ def default_policy(bucket: str) -> dict[str, Any]:
     }
 
 
-def require_current_user(token: str = Depends(oauth2_scheme)) -> Any:
-    try:
-        from auth.jwt import decode_token
-        from db import SessionLocal
-        from db_models import User
-    except ModuleNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Auth dependency is not installed: {exc.name}",
-        ) from exc
-
-    token_data = decode_token(token)
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.email == token_data.email).first()
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-        return user
-    finally:
-        db.close()
-
-
 @router.get("", response_model=list[BucketPolicy])
 async def list_policies() -> list[dict[str, Any]]:
     """Return all saved bucket policies."""
@@ -97,7 +75,7 @@ async def get_policy(bucket: str) -> dict[str, Any]:
 async def upsert_policy(
     bucket: str,
     policy: BucketPolicyUpdate,
-    current_user: Any = Depends(require_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Create or replace the required policy for a bucket."""
     saved_policy = policy.model_dump()
@@ -109,7 +87,7 @@ async def upsert_policy(
 async def create_policy(
     bucket: str,
     policy: BucketPolicyUpdate,
-    current_user: Any = Depends(require_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Create a bucket policy. Use PUT for idempotent updates."""
     existing = await github_store.get_bucket_policy(bucket)
@@ -123,7 +101,7 @@ async def create_policy(
 @router.delete("/{bucket}")
 async def delete_policy(
     bucket: str,
-    current_user: Any = Depends(require_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> dict[str, str]:
     _ = current_user
     deleted = await github_store.delete_bucket_policy(bucket)

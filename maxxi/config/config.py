@@ -1,8 +1,42 @@
-# type: ignore
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv(override=False)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
+load_dotenv(PROJECT_ROOT / ".env", override=False)
+load_dotenv(BACKEND_ROOT / ".env", override=False)
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def _database_url() -> str:
+    for env_name in (
+        "DATABASE_URL",
+        "MAXXI_DATABASE_URL",
+        "POSTGRES_URL",
+        "POSTGRES_PRISMA_URL",
+        "POSTGRES_URL_NON_POOLING",
+    ):
+        value = os.getenv(env_name)
+        if value:
+            database_url = value.strip()
+            if database_url.startswith("postgres://"):
+                database_url = database_url.replace("postgres://", "postgresql://", 1)
+            return database_url
+
+    if os.getenv("VERCEL") or _env_bool("MAXXI_REQUIRE_DATABASE_URL"):
+        raise RuntimeError(
+            "DATABASE_URL is required in production. Set it to your Neon/Postgres connection string."
+        )
+
+    return f"sqlite:///{BACKEND_ROOT / 'maxxi.db'}"
 
 # Server
 PORT: int = int(os.getenv("PORT", "8000"))
@@ -10,7 +44,7 @@ PUBLIC_BASE_URL: str = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 CDN_BASE_URL: str = os.getenv("CDN_BASE_URL", "").rstrip("/")
 
 # Database / auth
-DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./maxxi.db")
+DATABASE_URL: str = _database_url()
 JWT_SECRET: str = os.getenv("JWT_SECRET", "change-me-in-production")
 JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080"))

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
+import { withoutPublicApiUrl } from '@/lib/config';
 import type { CdnFile } from '@/types/cdn';
 
 type PreviewContentType = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other';
@@ -48,7 +49,7 @@ function ImagePreview({ url, filename }: { url: string; filename?: string }) {
       <img
         src={url}
         alt={filename}
-        className="max-w-full max-h-[60vh] object-contain shadow-md"
+        className="max-w-full max-h-[60vh] object-contain bg-white"
         onError={(e: SyntheticEvent<HTMLImageElement>) => { e.currentTarget.style.display = 'none'; }}
       />
     </div>
@@ -129,7 +130,7 @@ function TextPreview({ url, extension }: { url: string; extension?: string }) {
 
 function OtherPreview({ file }: { file: CdnFile }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-4 bg-muted/20 rounded-lg border border-border">
+    <div className="flex flex-col items-center justify-center py-16 gap-4 bg-white rounded-lg border border-dashed border-border">
       <FileIcon className="h-16 w-16 text-muted-foreground/40" />
       <div className="text-center">
         <p className="font-medium text-foreground">{file.filename}</p>
@@ -193,7 +194,7 @@ export default function FilePreviewModal({ file, open, onClose }: FilePreviewMod
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full p-0 gap-0 overflow-hidden">
+      <DialogContent hideClose className="max-w-4xl w-full p-0 gap-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card">
           <div className="flex items-center gap-3 min-w-0">
@@ -237,7 +238,7 @@ export default function FilePreviewModal({ file, open, onClose }: FilePreviewMod
         </div>
 
         {/* Metadata footer */}
-        <div className="border-t border-border bg-muted/30 px-5 py-3">
+        <div className="border-t border-border bg-white px-5 py-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div>
               <p className="text-muted-foreground">MIME Type</p>
@@ -249,12 +250,12 @@ export default function FilePreviewModal({ file, open, onClose }: FilePreviewMod
             </div>
             <div>
               <p className="text-muted-foreground">Storage</p>
-              <p className="font-medium capitalize">{file.telegram?.storage || 'telegram'}</p>
+              <p className="font-medium capitalize">{file.github ? 'GitHub' : 'telegram'}</p>
             </div>
             <div>
               <p className="text-muted-foreground">CDN URL</p>
               <p className="font-mono truncate text-primary cursor-pointer" onClick={handleCopyCdnUrl} title={file.cdn_url}>
-                {file.cdn_url ? file.cdn_url.replace('https://mxcdn.vercel.app', '') : '—'}
+                {file.cdn_url ? withoutPublicApiUrl(file.cdn_url) : '—'}
               </p>
             </div>
           </div>

@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from api.api_routers import router as api_docs_router
 from db import create_db_tables
 from routes.auth import router as auth_router
 from routes.bucket_policies import router as bucket_policies_router
@@ -43,7 +44,14 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Content-Type", "X-Requested-With", "Authorization"],
+    allow_headers=[
+        "Content-Type",
+        "X-Requested-With",
+        "Authorization",
+        "X-MAXXI-ACCESS-KEY",
+        "X-MAXXI-SECRET-KEY",
+        "X-API-Key",
+    ],
 )
 
 
@@ -58,6 +66,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+app.include_router(api_docs_router)
 app.include_router(router)
 app.include_router(repo_cdn_router)
 app.include_router(bucket_policies_router)

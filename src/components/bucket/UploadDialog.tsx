@@ -3,7 +3,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, FileIcon, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, FileIcon, X, CheckCircle2, AlertCircle, LucideUploadCloud } from 'lucide-react';
 import { maxxiApi } from '@/lib/maxxiApi';
 import { toast } from "sonner";
 import type { UploadProgressState } from '@/types/cdn';
@@ -84,7 +84,9 @@ export default function UploadDialog({ open, onOpenChange, folder = null, folder
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Files</DialogTitle>
+          <DialogTitle>
+            <LucideUploadCloud className="inline-block mr-2 mb-1" />
+            Upload Files</DialogTitle>
         </DialogHeader>
 
         <div

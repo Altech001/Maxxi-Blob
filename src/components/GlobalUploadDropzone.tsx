@@ -45,6 +45,7 @@ export default function GlobalUploadDropzone() {
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const dragDepthRef = useRef(0);
   const queueStartedRef = useRef(new Set<string>());
+  const mountedRef = useRef(true);
 
   const { data: folderData } = useQuery({
     queryKey: ['api-files-folder', bucket],
@@ -52,6 +53,14 @@ export default function GlobalUploadDropzone() {
     enabled: !!bucket,
     staleTime: 30_000,
   });
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const detectedFolderId = folderData?.files?.find((file) => file.folder_id != null)?.folder_id ?? null;
 
@@ -98,11 +107,10 @@ export default function GlobalUploadDropzone() {
     if (!next) return;
 
     queueStartedRef.current.add(next.id);
-    let cancelled = false;
-
     const run = async () => {
       setUploadQueue(prev => prev.map((item) => item.id === next.id ? { ...item, status: 'uploading', progress: 12 } : item));
       const timer = window.setInterval(() => {
+        if (!mountedRef.current) return;
         setUploadQueue(prev => prev.map((item) => {
           if (item.id !== next.id || item.status !== 'uploading') return item;
           return { ...item, progress: Math.min(item.progress + 9, 88) };
@@ -111,12 +119,12 @@ export default function GlobalUploadDropzone() {
 
       try {
         await maxxiApi.uploadFile(next.file, bucket ? detectedFolderId : null);
-        if (!cancelled) {
+        if (mountedRef.current) {
           setUploadQueue(prev => prev.map((item) => item.id === next.id ? { ...item, status: 'done', progress: 100 } : item));
           refreshFiles();
         }
       } catch (error) {
-        if (!cancelled) {
+        if (mountedRef.current) {
           setUploadQueue(prev => prev.map((item) => item.id === next.id ? {
             ...item,
             status: 'error',
@@ -130,10 +138,6 @@ export default function GlobalUploadDropzone() {
     };
 
     run();
-
-    return () => {
-      cancelled = true;
-    };
   }, [bucket, detectedFolderId, refreshFiles, uploadQueue]);
 
   useEffect(() => {

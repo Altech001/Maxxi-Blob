@@ -20,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { MAXXI_PUBLIC_API_URL } from '@/lib/config';
 import { maxxiApi, type BucketPolicyUpdate, type CreatedIamKey } from '@/lib/maxxiApi';
 
 type LocationState = {
@@ -27,8 +28,7 @@ type LocationState = {
   policy?: string;
 };
 
-const S3_ENDPOINT = 'https://t3.storage.dev';
-const IAM_ENDPOINT = 'https://iam.storage.dev';
+const API_ENDPOINT = MAXXI_PUBLIC_API_URL;
 
 function formatDate(value: string) {
   try {
@@ -378,7 +378,7 @@ export default function BucketPolicies() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3 rounded-md border bg-sky-50/40 p-3">
-                <span className="text-sm">Connect using a single global endpoint</span>
+                <span className="text-sm">Connect using the Maxxi REST endpoint</span>
                 <Select defaultValue="default">
                   <SelectTrigger className="w-28 bg-background">
                     <SelectValue />
@@ -387,7 +387,7 @@ export default function BucketPolicies() {
                     <SelectItem value="default">Default</SelectItem>
                   </SelectContent>
                 </Select>
-                <CopyField value={S3_ENDPOINT} label="S3 endpoint" className="w-64" />
+                <CopyField value={API_ENDPOINT} label="API endpoint" className="w-64" />
               </div>
 
               <div className="relative">
@@ -475,9 +475,10 @@ export default function BucketPolicies() {
             <div className="space-y-3">
               <KeyValueRow label="Access Key ID" value={createdKey.access_key_id} />
               <KeyValueRow label="Secret Access Key" value={createdKey.secret_access_key} />
-              <KeyValueRow label="Endpoint URL S3" value={S3_ENDPOINT} withSelect />
-              <KeyValueRow label="Endpoint URL IAM" value={IAM_ENDPOINT} withSelect />
-              <KeyValueRow label="Region" value="auto" />
+              <KeyValueRow label="Endpoint URL API" value={API_ENDPOINT} withSelect />
+              <KeyValueRow label="Header Access Key" value="X-MAXXI-ACCESS-KEY" />
+              <KeyValueRow label="Header Secret Key" value="X-MAXXI-SECRET-KEY" />
+              <KeyValueRow label="Boto3 / S3" value="Not S3-compatible yet" />
               <div className="flex items-center justify-between rounded-md bg-muted/60 p-4 text-sm">
                 Environment Variables
                 <Switch />

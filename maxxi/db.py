@@ -9,7 +9,11 @@ import config
 Base = declarative_base()
 logger = logging.getLogger(__name__)
 
-engine = create_engine(config.DATABASE_URL, pool_pre_ping=True)
+engine_kwargs = {"pool_pre_ping": True}
+if config.DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(config.DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 def create_db_tables() -> None:
     import db_models  # noqa: F401

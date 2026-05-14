@@ -3,7 +3,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, FileIcon, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, FileIcon, X, CheckCircle2, AlertCircle, CloudUpload } from 'lucide-react';
 import { maxxiApi } from '@/lib/maxxiApi';
 import { toast } from "sonner";
 import type { UploadProgressState } from '@/types/cdn';
@@ -82,7 +82,11 @@ export default function CreateBucketDialog({ open, onOpenChange, onCreated }: Cr
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Files to Maxxi CDN</DialogTitle>
+          <DialogTitle className='flex gap-2 items-center'>
+            <div className='border-2 border-primary rounded-full p-2'>
+              <CloudUpload className="inline h-5 w-5 mr-2 text-primary" />
+            </div>
+            Upload Files</DialogTitle>
         </DialogHeader>
 
         <div
@@ -91,9 +95,9 @@ export default function CreateBucketDialog({ open, onOpenChange, onCreated }: Cr
           onClick={() => !uploading && inputRef.current?.click()}
           className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all"
         >
-          <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" strokeWidth={1.5} />
+          <CloudUpload className="h-8 w-8 mx-auto text-muted-foreground mb-3" strokeWidth={1.5} />
           <p className="text-sm font-medium text-foreground">Drop files here or click to browse</p>
-          <p className="text-xs text-muted-foreground mt-1">Bytes stored in Telegram · Metadata in GitHub</p>
+          <p className="text-xs text-muted-foreground mt-1">Cdn File Transfer Storage</p>
           <input ref={inputRef} type="file" multiple className="hidden" onChange={handleSelect} />
         </div>
 

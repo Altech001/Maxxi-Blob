@@ -1,13 +1,12 @@
 /**
  * Maxxi CDN API Client
- * Base URL: https://mxcdn.vercel.app
+ * Base URL: VITE_MAXXI_API_URL
  * Spec: OpenAPI 3.1.0
  */
 
+import { MAXXI_API_URL, MAXXI_PUBLIC_API_URL, apiUrl } from "@/lib/config";
 import type { CdnFile, ListFilesResponse } from "@/types/cdn";
 
-// In dev, use relative URLs so Vite's proxy handles CORS; in prod, use the full origin.
-const BASE_URL = import.meta.env.DEV ? "" : "https://mxcdn.vercel.app";
 const AUTH_TOKEN_KEY = "mxcdn-auth-token";
 
 export type AuthToken = {
@@ -65,7 +64,7 @@ type ApiErrorBody = {
 };
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  const url = apiUrl(path);
   const res = await fetch(url, options);
   if (!res.ok) {
     const err = (await res.json().catch(() => ({}))) as ApiErrorBody;
@@ -162,7 +161,7 @@ export function getDownloadUrl(
 ): string {
   const params = new URLSearchParams({ disposition });
   if (folderId != null) params.set('folder_id', String(folderId));
-  return `${BASE_URL}/api/v1/files/${fileId}/download?${params.toString()}`;
+  return apiUrl(`/api/v1/files/${fileId}/download?${params.toString()}`);
 }
 
 /**
@@ -176,7 +175,7 @@ export function getPreviewUrl(fileId: string, folderId: number | null = null): s
   const params = new URLSearchParams();
   if (folderId != null) params.set('folder_id', String(folderId));
   const qs = params.toString();
-  return `${BASE_URL}/api/v1/files/${fileId}/preview${qs ? `?${qs}` : ''}`;
+  return apiUrl(`/api/v1/files/${fileId}/preview${qs ? `?${qs}` : ''}`);
 }
 
 /**
@@ -204,7 +203,7 @@ export async function deleteFile(fileId: string, folderId: number | null = null)
 export async function uploadRepoFile(file: File): Promise<Record<string, unknown>> {
   const form = new FormData();
   form.append('file', file);
-  return request<Record<string, unknown>>('https://cdn.pitbox.fun/api/v1/repo/files', {
+  return request<Record<string, unknown>>('/api/v1/repo/files', {
     method: 'POST',
     headers: { accept: 'application/json' },
     body: form,
@@ -299,5 +298,6 @@ export const maxxiApi = {
   getPreviewUrl,
   deleteFile,
   uploadRepoFile,
-  BASE_URL,
+  BASE_URL: MAXXI_API_URL,
+  PUBLIC_BASE_URL: MAXXI_PUBLIC_API_URL,
 };
