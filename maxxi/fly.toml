@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for maxxi on 2026-05-13T23:54:21+03:00
+# fly.toml app configuration file generated for maxxi on 2026-05-15T20:35:03+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,7 +9,7 @@ primary_region = 'jnb'
 [build]
 
 [http_service]
-  internal_port = 8000
+  internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
