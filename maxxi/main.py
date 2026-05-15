@@ -44,7 +44,6 @@ _ALLOWED_ORIGINS: list[str] = [
     "https://maxxi-t76w.onrender.com",
     "http://localhost:5173",
     "http://localhost:3000",
-    "*",
 ]
 
 app.add_middleware(
